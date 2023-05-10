@@ -12,6 +12,5 @@ public class Response {
         outputStream.write(jsonMessage.getBytes());
         outputStream.flush();
         outputStream.close();
-
     }
 }
