@@ -1,15 +1,10 @@
 package com.bay.server;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
-
-
 
 public class Server {
     private final int port;
@@ -18,7 +13,7 @@ public class Server {
 
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(this.port), 0);
         httpServer.setExecutor(Executors.newSingleThreadExecutor());
-        httpServer.createContext("/", new Handler());
+        httpServer.createContext("/", new Request.Handler());
         httpServer.start();
         System.out.println(this);
     }
