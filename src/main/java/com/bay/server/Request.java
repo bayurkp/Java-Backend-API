@@ -18,7 +18,8 @@ public class Request {
                     exchange.getRequestMethod().equals("POST") ||
                     exchange.getRequestMethod().equals("PUT") ||
                     exchange.getRequestMethod().equals("DELETE")) {
-                new Response(exchange, 200, "{\"statusCode\": 200, " + "\"message\": \"Hello, " + parseRequestBody(exchange).get("name").asText() + "!\"}");
+                new Response(exchange, 200, "Hello, World!");
+//                new Response(exchange, 200, "{\"statusCode\": 200, " + "\"message\": \"Hello, " + parseRequestBody(exchange).get("name").asText() + "!\"}");
             } else {
                 new Response(exchange, 405, "{\"statusCode\": 405, \"message\": \"Method not allowed\"}");
             }
