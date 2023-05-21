@@ -1,15 +1,16 @@
 package com.bay.server;
 
-import com.bay.data.Database;
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.JsonNode;
-//import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Scanner;
 
 public class Request {
     private final String[] requestMethodsAllowed = {
@@ -18,49 +19,52 @@ public class Request {
       "PUT",
       "DELETE"
     };
+
     public static class Handler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            int statusCode;
             exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/json"));
             String[] requestPath = new Request().splitRequest(exchange.getRequestURI().getPath(), "/");
             String tableName = requestPath[0];
             String requestMethod = exchange.getRequestMethod();
 
-            if (!new Request().isRequestMethodAllowed(requestMethod)) {
-                new Response(exchange).send(405, "{" +
-                        "\"status\": 405," +
+            if (!Validate.isRequestMethodAllowed(requestMethod)) {
+                new Response(exchange).send(statusCode = 405, "{" +
+                        "\"status\": " + statusCode + "," +
                         "\"message\": \"Method not allowed\"" +
                         "}");
             }
 
-            if (!new Request().isTableExists(tableName)) {
-                new Response(exchange).send(404, "{" +
-                        "\"status\": 404," +
+            if (!Validate.isTableExists(tableName)) {
+                new Response(exchange).send(statusCode = 404, "{" +
+                        "\"status\": " + statusCode + "," +
                         "\"message\": \"Table " + tableName + " was not found\"" +
+                        "}");
+            }
+
+            if (!Validate.isRequestBodyValid(exchange)) {
+                new Response(exchange).send(statusCode = 400, "{" +
+                        "\"status\": " + statusCode + "," +
+                        "\"message: Please input request body as JSON for insert and update data\"" +
                         "}");
             }
         }
     }
 
-//    public JsonNode parseRequestBody(HttpExchange exchange) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        InputStream requestBody = exchange.getRequestBody();
-//        Scanner scanner = new Scanner(requestBody).useDelimiter("\\A");
-//        String result = scanner.hasNext() ? scanner.next() : "";
-//        return objectMapper.readTree(result);
-//    }
-
-    public boolean isTableExists(String tableName) {
-        Database database = new Database();
-        return Arrays.asList(database.getTables()).contains(tableName);
-    }
-
-    public boolean isRequestMethodAllowed(String method) {
-        return Arrays.asList(requestMethodsAllowed).contains(method);
+    public JsonNode parseRequestBody(HttpExchange exchange) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        InputStream requestBody = exchange.getRequestBody();
+        Scanner scanner = new Scanner(requestBody).useDelimiter("\\A");
+        String result = scanner.hasNext() ? scanner.next() : "";
+        return objectMapper.readTree(result);
     }
 
     public String[] splitRequest(String request, String delimiter) {
         return Arrays.stream(request.split("/")).filter(value -> value != null && value.length() > 0).toArray(String[]::new);
     }
 
+    public String[] getRequestMethodsAllowed() {
+        return requestMethodsAllowed;
+    }
 }
