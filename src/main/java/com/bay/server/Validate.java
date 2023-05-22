@@ -25,8 +25,8 @@ public class Validate {
                 } catch (Exception e) {
                     return false;
                 }
-                return true;
-            }
+            } else
+                return false;
         }
 
         return true;

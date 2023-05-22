@@ -61,7 +61,7 @@ public class Request {
     }
 
     public String[] splitRequest(String request, String delimiter) {
-        return Arrays.stream(request.split("/")).filter(value -> value != null && value.length() > 0).toArray(String[]::new);
+        return Arrays.stream(request.split(delimiter)).filter(value -> value != null && value.length() > 0).toArray(String[]::new);
     }
 
     public String[] getRequestMethodsAllowed() {
