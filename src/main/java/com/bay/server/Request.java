@@ -26,7 +26,12 @@ public class Request {
             int statusCode;
             exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/json"));
             String[] requestPath = new Request().splitRequest(exchange.getRequestURI().getPath(), "/");
-            String tableName = requestPath[0];
+            String tableName = null;
+            try {
+                tableName = requestPath[0];
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println(e);
+            }
             String requestMethod = exchange.getRequestMethod();
 
             if (!Validate.isRequestMethodAllowed(requestMethod)) {
@@ -49,6 +54,11 @@ public class Request {
                         "\"message: Please input request body as JSON for insert and update data\"" +
                         "}");
             }
+
+            new Response(exchange).send(statusCode = 404, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": \"Still Working\"" +
+                    "}");
         }
     }
 

@@ -1,7 +1,6 @@
 package com.bay.server;
 
 import com.bay.data.Database;
-import com.fasterxml.jackson.databind.annotation.JsonTypeResolver;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
@@ -30,5 +29,10 @@ public class Validate {
         }
 
         return true;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Arrays.toString(new Request().splitRequest("/", "/")));
+        System.out.println(new Request().splitRequest("/", "/")[0]);
     }
 }
