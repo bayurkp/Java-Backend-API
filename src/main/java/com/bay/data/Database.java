@@ -1,6 +1,7 @@
 package com.bay.data;
 
 import java.sql.*;
+import java.util.*;
 
 public class Database {
     private final String rootPath = System.getProperty("user.dir");
@@ -29,19 +30,43 @@ public class Database {
         return tables;
     }
 
-    public static void main(String[] args) {
-        Database database =  new Database();
+    public String select(String tableName, String condition) {
+        List<Map<String, Object>> rows = new ArrayList<>();
         try {
-            Connection connection = database.connect();
+            String query = "SELECT * FROM " + tableName +
+                    (condition != null ? " WHERE " + condition : "");
+            Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
+            ResultSet resultSet = statement.executeQuery(query);
+
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
 
             while (resultSet.next()) {
-                System.out.println(resultSet.getString("first_name") + "\t" + resultSet.getString("last_name"));
+                Map<String, Object> row = new LinkedHashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = resultSetMetaData.getColumnName(i);
+                    Object columnValue = resultSet.getObject(i);
+                    if (columnValue instanceof String) row.put("\"" + columnName + "\"", "\"" + columnValue + "\"");
+                    else row.put("\"" + columnName + "\"", columnValue);
+                }
+                rows.add(row);
             }
         } catch (SQLException e) {
             System.err.println(e);
+            e.printStackTrace();
+            return e.getMessage();
         }
+
+        return rows.toString().replaceAll("=", ": ");
+    }
+
+//    public String insert(String tableName, String fields, String records) {
+//
+//    }
+
+    public static void main(String[] args) {
+
     }
 
 }
