@@ -1,5 +1,7 @@
 package com.bay.data;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.sql.*;
 import java.util.*;
 
@@ -58,12 +60,19 @@ public class Database {
             return e.getMessage();
         }
 
-        return rows.toString().replaceAll("=", ": ");
+        return (rows.size() > 1 ? rows : rows.get(0)).toString().replaceAll("=", ": ");
     }
 
-//    public String insert(String tableName, String fields, String records) {
-//
-//    }
+    public int insert(String tableName, String fieldKeys, String fieldValues) {
+        try {
+            String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
+            Connection connection = this.connect();
+            Statement statement = connection.createStatement();
+            return statement.executeUpdate(query);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void main(String[] args) {
 

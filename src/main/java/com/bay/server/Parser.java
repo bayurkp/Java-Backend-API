@@ -4,20 +4,30 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Parser {
-    public static JsonNode parseJson(InputStream inputStream) throws JsonProcessingException {
+    public static JsonNode parseJson(String json) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        Scanner scanner = new Scanner(inputStream);
-        StringBuffer stringBuffer = new StringBuffer();
-        while(scanner.hasNext()){
-            stringBuffer.append(scanner.nextLine());
+        return objectMapper.readTree(json);
+    }
+
+    public static String parseInputStream(InputStream inputStream) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        int b;
+        StringBuilder buffer = new StringBuilder();
+        while ((b = bufferedReader.read()) != -1) {
+            buffer.append((char) b);
         }
-        System.out.println(stringBuffer);
-        return objectMapper.readTree(stringBuffer.toString());
+
+        bufferedReader.close();
+        inputStreamReader.close();
+
+        return buffer.toString();
     }
 
     public static String[] splitString(String text, String delimiter) {
@@ -78,5 +88,21 @@ public class Parser {
         }
 
         return null;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String jsonIn = "{\n" +
+                "    \"id\": 1,\n" +
+                "    \"firstName\": \"Bayu\",\n" +
+                "    \"lastName\": \"Pratama\",\n" +
+                "    \"email\": \"pratama00@mail.com\",\n" +
+                "    \"phone_number\": \"081234567890\",\n" +
+                "    \"type\": \"Buyer\"\n" +
+                "}";
+        InputStream json = new ByteArrayInputStream(jsonIn.getBytes(StandardCharsets.UTF_8));
+
+        byte[] jsonBytes = json.readAllBytes();
+        String jsonString = new String(jsonBytes, StandardCharsets.UTF_8);
+        System.out.println(Parser.parseJson(jsonString).get("firstName").asText());
     }
 }

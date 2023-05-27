@@ -1,9 +1,6 @@
 package com.bay.server;
 
 import com.bay.data.Database;
-import com.sun.net.httpserver.HttpExchange;
-
-import java.io.IOException;
 import java.util.Arrays;
 
 public class Validate {
@@ -16,20 +13,13 @@ public class Validate {
         return Arrays.asList(database.getTables()).contains(tableName);
     }
 
-    public static boolean isRequestBodyValid(HttpExchange exchange) throws IOException {
-        if ("POST".equals(exchange.getRequestMethod()) ||
-                "PUT".equals(exchange.getRequestMethod())) {
-            if (exchange.getRequestBody().available() != 0) {
-                try {
-                    Parser.parseJson(exchange.getRequestBody());
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    return false;
-                }
-            } else
-                return false;
+    public static boolean isRequestBodyValid(String requestBody) {
+        try {
+            Parser.parseJson(requestBody);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
         }
-
         return true;
     }
 }
