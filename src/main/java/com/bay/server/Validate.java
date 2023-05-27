@@ -7,21 +7,23 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Validate {
-    public static boolean isTableExists(String tableName) {
-        Database database = new Database();
-        return Arrays.asList(database.getTables()).contains(tableName);
-    }
-
     public static boolean isRequestMethodAllowed(String requestMethod) {
         return Arrays.asList(new Request().getRequestMethodsAllowed()).contains(requestMethod);
     }
 
+    public static boolean isTableNameValid(String tableName) {
+        Database database = new Database();
+        return Arrays.asList(database.getTables()).contains(tableName);
+    }
+
     public static boolean isRequestBodyValid(HttpExchange exchange) throws IOException {
-        if ("POST".equals(exchange.getRequestMethod()) || "PUT".equals(exchange.getRequestMethod())) {
+        if ("POST".equals(exchange.getRequestMethod()) ||
+                "PUT".equals(exchange.getRequestMethod())) {
             if (exchange.getRequestBody().available() != 0) {
                 try {
-                    new Request().parseRequestBody(exchange);
+                    Parser.parseJson(exchange.getRequestBody());
                 } catch (Exception e) {
+                    System.out.println(e.getMessage());
                     return false;
                 }
             } else

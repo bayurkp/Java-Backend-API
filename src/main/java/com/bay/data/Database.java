@@ -5,9 +5,9 @@ import java.util.*;
 
 public class Database {
     private final String rootPath = System.getProperty("user.dir");
-    private String[] tables = {
+    private final String[] tables = {
             "addresses",
-            "order_details",
+            "orderDetails",
             "orders",
             "products",
             "reviews",
