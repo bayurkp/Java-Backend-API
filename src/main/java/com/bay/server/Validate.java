@@ -1,6 +1,7 @@
 package com.bay.server;
 
 import com.bay.data.Database;
+
 import java.util.Arrays;
 
 public class Validate {

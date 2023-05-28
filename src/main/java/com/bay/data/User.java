@@ -1,8 +1,5 @@
 package com.bay.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class User {
     private int id;
     private String firstName;
@@ -70,15 +67,5 @@ public class User {
 
     public void setType(UserType type) {
         this.type = type;
-    }
-
-    @Override
-    public String toString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

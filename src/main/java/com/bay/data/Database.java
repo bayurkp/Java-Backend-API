@@ -2,6 +2,7 @@ package com.bay.data;
 
 import com.bay.server.Parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.sql.*;
 import java.util.*;
 
@@ -47,7 +48,7 @@ public class Database {
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = resultSetMetaData.getColumnName(i);
                     Object columnValue = resultSet.getObject(i);
-                    row.append("\"").append(columnName).append("\": \"").append(columnValue).append("\",");
+                    row.append("\"").append(columnName).append("\":\"").append(columnValue).append("\",");
                 }
                 row.deleteCharAt(row.length() - 1);
                 row.append("}");
@@ -55,7 +56,7 @@ public class Database {
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 Object object = objectMapper.readValue(row.toString(), Class.forName("com.bay.data." + getClassName(tableName)));
-                rows.add(object.toString());
+                rows.add(toJson(object));
             }
 
             if (rows.size() == 0) return new Result(null, "No matching data found, please check your request", 404, false);
@@ -65,7 +66,6 @@ public class Database {
             return new Result(null, e.getMessage(), 400, false);
         }
     }
-
     public Result insert(String tableName, String fieldKeys, String fieldValues) {
         try {
             String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
@@ -118,7 +118,6 @@ public class Database {
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(null, e.getMessage(), 400,false);
-
         }
     }
 
@@ -134,10 +133,27 @@ public class Database {
         return stringBuilder.toString();
     }
 
-    public String[] getTables() {
-        return tables;
+    public String toJson(Object object) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void main(String[] args) {
+    public String joinJson(String firstJson, String tableName, String secondJson) {
+        StringBuilder stringBuilder = new StringBuilder(firstJson);
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        stringBuilder.append(",");
+        stringBuilder.append("\"").append(tableName).append("\"").append(":");
+        stringBuilder.append(secondJson);
+        stringBuilder.append("}]");
+        return stringBuilder.toString();
+    }
+
+    public String[] getTables() {
+        return tables;
     }
 }

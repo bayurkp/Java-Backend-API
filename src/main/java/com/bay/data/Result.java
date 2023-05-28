@@ -13,8 +13,8 @@ public class Result {
         this.isSuccess = isSuccess;
     }
 
-    public Object getData() {
-        return data;
+    public String getData() {
+        return data.toString();
     }
 
     public String getMessage() {

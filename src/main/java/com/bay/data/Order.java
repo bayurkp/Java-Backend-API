@@ -6,16 +6,16 @@ public class Order {
     private String note;
     private int total;
     private int discount;
-    private boolean isPaid;
+    private int isPaid;
 
-    public Order(int id, int buyer, String note, int total, int discount, boolean isPaid) {
-        this.id = id;
-        this.buyer = buyer;
-        this.note = note;
-        this.total = total;
-        this.discount = discount;
-        this.isPaid = isPaid;
-    }
+//    public Order(int id, int buyer, String note, double total, int discount, int isPaid) {
+//        this.id = id;
+//        this.buyer = buyer;
+//        this.note = note;
+//        this.total = total;
+//        this.discount = discount;
+//        this.isPaid = isPaid;
+//    }
 
     public Order() {
         super();
@@ -45,7 +45,7 @@ public class Order {
         this.note = note;
     }
 
-    public int getTotal() {
+    public double getTotal() {
         return total;
     }
 
@@ -61,11 +61,11 @@ public class Order {
         this.discount = discount;
     }
 
-    public boolean isPaid() {
+    public int isPaid() {
         return isPaid;
     }
 
-    public void setPaid(boolean paid) {
+    public void setPaid(int paid) {
         isPaid = paid;
     }
 }

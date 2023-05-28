@@ -32,13 +32,13 @@ public class Request {
                 String requestBody = Parser.parseInputStream(exchange.getRequestBody());
 
                 String tableName = null;
-                int id = 0;
+                String id = null;
                 String tableName2 = null;
 
                 try {
                     tableName = requestPath[0];
-                    if (requestPath.length == 2) id = Integer.parseInt(requestPath[1]);
-                    if (requestPath.length == 3) tableName2 = requestPath[2];
+                    if (requestPath.length > 1) id = requestPath[1];
+                    if (requestPath.length > 2) tableName2 = requestPath[2];
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -74,31 +74,35 @@ public class Request {
                 }
 
                 JsonNode jsonNode = Parser.parseJson(requestBody);
-                if (requestMethod.equals("GET")) {
-                    // DDo this when the user only routes to the table name without adding a query in the URL
-                    if (requestPath.length == 1 && requestQuery != null) {
-                        response.handleGet(tableName, condition);
+                switch (requestMethod) {
+                    case "GET":
+                        // Do this when the user only routes to the table name without adding a query in the URL
+                        if (requestPath.length == 1 && requestQuery != null) {
+                            response.handleGet(tableName, condition);
 
-                    // Do when URL just route to the table without query
-                    } else if (requestPath.length == 1) {
-                        response.handleGet(tableName, null);
-                    } else if (requestPath.length == 2 && requestQuery == null) {
-                        response.handleGet(tableName, "id=" + requestPath[1]);
-//                    } else if (requestPath.length == 3) {
-//                        response.handleGet(tableName, id, tableName2);
-                    }
-                }
+                            // Do when URL just route to the table without query
+                        } else if (requestPath.length == 1) {
+                            response.handleGet(tableName, null);
 
-                if (requestMethod.equals("POST")) {
-                    response.handlePost(tableName, jsonNode);
-                }
-
-                if (requestMethod.equals("PUT")) {
-                    response.handlePut(tableName, id, jsonNode);
-                }
-
-                if (requestMethod.equals("DELETE")) {
-                    response.handleDelete(tableName, id);
+                        } else if (requestPath.length == 2 && requestQuery == null) {
+                            response.handleGet(tableName, Integer.parseInt(id), null);
+                        } else if (requestPath.length == 3 && requestQuery == null) {
+                            response.handleGet(tableName, Integer.parseInt(id), tableName2);
+                        }
+                        break;
+                    case "POST":
+                        response.handlePost(tableName, jsonNode);
+                        break;
+                    case "PUT":
+                        if (requestPath.length == 2) {
+                            response.handlePut(tableName, Integer.parseInt(id), jsonNode);
+                        }
+                        break;
+                    case "DELETE":
+                        if (requestPath.length == 2) {
+                            response.handleDelete(tableName, Integer.parseInt(id));
+                        }
+                        break;
                 }
             } catch (Exception e) {
                 System.err.println(e.getMessage());
