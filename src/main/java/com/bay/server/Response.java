@@ -1,6 +1,7 @@
 package com.bay.server;
 
 import com.bay.data.Database;
+import com.bay.data.Result;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
@@ -17,23 +18,27 @@ public class Response {
     }
 
     public void handleGet(String tableName, String condition) throws IOException {
-        int statusCode = 200;
-        String message = "OK";
-        String result = this.database.select(tableName, condition);
+        Result result = this.database.select(tableName, condition);
+        int statusCode = result.getStatusCode();
 
-        System.out.println(result);
-        this.send(statusCode, "{" +
-                "\"status\": " + statusCode + "," +
-                "\"message\": " + "\"" + message + "\"," +
-                "\"data\": " + result +
-                "}"
-        );
+        if (result.isSuccess()) {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage() + "," +
+                    "\"data\": " + result.getData().toString() +
+                    "}"
+            );
+        } else {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage() +
+                    "}"
+            );
+        }
     }
 
-    public void handlePost(String tableName, JsonNode jsonNode) throws IOException {
-        int statusCode = 200;
-        String message = "OK";
 
+    public void handlePost(String tableName, JsonNode jsonNode) throws IOException {
         StringBuilder fieldKeys = new StringBuilder();
         StringBuilder fieldValues = new StringBuilder();
 
@@ -48,25 +53,31 @@ public class Response {
             fieldValues.append(",");
         }
 
+        // Remove the comma (,) character at the end of the string
         fieldKeys.deleteCharAt(fieldKeys.length() - 1);
         fieldValues.deleteCharAt(fieldValues.length() - 1);
 
         System.out.println(fieldKeys);
         System.out.println(fieldValues);
 
-        int result = this.database.insert(tableName, fieldKeys.toString(), fieldValues.toString());
+        Result result = this.database.insert(tableName, fieldKeys.toString(), fieldValues.toString());
+        int statusCode = result.getStatusCode();
 
+        if (result.isSuccess()) {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage() + "," +
+                    "\"data\": " + result.getData() +
+                    "}");
+        }
 
-        System.out.println(result);
         this.send(statusCode, "{" +
                 "\"status\": " + statusCode + "," +
-                "\"message\": " + "\"" + message + "\"," +
-                "\"data\": " + result +
-                "}"
-        );
+                "\"message\": " + result.getMessage()  +
+                "}");
     }
 
-//
+
 //    public String handlePut() {
 //
 //    }
@@ -82,4 +93,5 @@ public class Response {
         outputStream.flush();
         outputStream.close();
     }
+    
 }

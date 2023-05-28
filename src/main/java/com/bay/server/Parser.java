@@ -1,5 +1,6 @@
 package com.bay.server;
 
+import com.bay.data.Database;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,21 +89,5 @@ public class Parser {
         }
 
         return null;
-    }
-
-    public static void main(String[] args) throws IOException {
-        String jsonIn = "{\n" +
-                "    \"id\": 1,\n" +
-                "    \"firstName\": \"Bayu\",\n" +
-                "    \"lastName\": \"Pratama\",\n" +
-                "    \"email\": \"pratama00@mail.com\",\n" +
-                "    \"phone_number\": \"081234567890\",\n" +
-                "    \"type\": \"Buyer\"\n" +
-                "}";
-        InputStream json = new ByteArrayInputStream(jsonIn.getBytes(StandardCharsets.UTF_8));
-
-        byte[] jsonBytes = json.readAllBytes();
-        String jsonString = new String(jsonBytes, StandardCharsets.UTF_8);
-        System.out.println(Parser.parseJson(jsonString).get("firstName").asText());
     }
 }

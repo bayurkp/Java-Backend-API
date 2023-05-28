@@ -1,7 +1,6 @@
 package com.bay.data;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.*;
 import java.util.*;
 
@@ -28,12 +27,8 @@ public class Database {
         return connection;
     }
 
-    public String[] getTables() {
-        return tables;
-    }
-
-    public String select(String tableName, String condition) {
-        List<Map<String, Object>> rows = new ArrayList<>();
+    public Result select(String tableName, String condition) {
+        List<String> rows = new ArrayList<>();
         try {
             String query = "SELECT * FROM " + tableName +
                     (condition != null ? " WHERE " + condition : "");
@@ -45,37 +40,59 @@ public class Database {
             int columnCount = resultSetMetaData.getColumnCount();
 
             while (resultSet.next()) {
-                Map<String, Object> row = new LinkedHashMap<>();
+                // Format to json
+                StringBuilder row = new StringBuilder();
+                row.append("{");
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = resultSetMetaData.getColumnName(i);
                     Object columnValue = resultSet.getObject(i);
-                    if (columnValue instanceof String) row.put("\"" + columnName + "\"", "\"" + columnValue + "\"");
-                    else row.put("\"" + columnName + "\"", columnValue);
+                    row.append("\"").append(columnName).append("\": \"").append(columnValue).append("\",");
                 }
-                rows.add(row);
-            }
-        } catch (SQLException e) {
-            System.err.println(e);
-            e.printStackTrace();
-            return e.getMessage();
-        }
+                row.deleteCharAt(row.length() - 1);
+                row.append("}");
+                // End of formatting
 
-        return (rows.size() > 1 ? rows : rows.get(0)).toString().replaceAll("=", ": ");
+                ObjectMapper objectMapper = new ObjectMapper();
+                Object object = objectMapper.readValue(row.toString(), Class.forName("com.bay.data." + getClassName(tableName)));
+                rows.add(object.toString());
+            }
+
+            if (rows.size() == 0) return new Result(null, "No matching data found, please check your request", 404, false);
+            return new Result(rows, "Success", 200, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(null, e.getMessage(), 400, false);
+        }
     }
 
-    public int insert(String tableName, String fieldKeys, String fieldValues) {
+    public Result insert(String tableName, String fieldKeys, String fieldValues) {
         try {
             String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
             Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(query);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return new Result(statement.executeUpdate(query), "Success", 200,true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(null, e.getMessage(), 404,false);
         }
     }
 
-    public static void main(String[] args) {
+    public String getClassName(String tableName) {
+        StringBuilder stringBuilder = new StringBuilder(tableName);
+        stringBuilder.deleteCharAt(0);
+        stringBuilder.insert(0, tableName.toUpperCase().charAt(0));
 
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        if (stringBuilder.charAt(stringBuilder.length() - 1) == 'e') {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        }
+        return stringBuilder.toString();
     }
 
+    public String[] getTables() {
+        return tables;
+    }
+
+    public static void main(String[] args) {
+    }
 }
