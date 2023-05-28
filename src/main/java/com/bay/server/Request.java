@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 public class Request {
@@ -24,6 +25,7 @@ public class Request {
                 exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/json"));
                 int statusCode;
 
+                OutputStream outputStream = exchange.getResponseBody();
                 String requestMethod = exchange.getRequestMethod();
                 String requestQuery = exchange.getRequestURI().getQuery();
                 String[] requestPath = Parser.splitString(exchange.getRequestURI().getPath(), "/");
@@ -32,6 +34,7 @@ public class Request {
                 String tableName = null;
                 int id = 0;
                 String tableName2 = null;
+
                 try {
                     tableName = requestPath[0];
                     if (requestPath.length == 2) id = Integer.parseInt(requestPath[1]);
@@ -71,16 +74,36 @@ public class Request {
                 }
 
                 JsonNode jsonNode = Parser.parseJson(requestBody);
-                if (requestMethod.equals("GET")) response.handleGet(tableName, condition);
-                if (requestMethod.equals("POST")) response.handlePost(tableName, jsonNode);
-                if (requestMethod.equals("PUT")) response.handlePut(tableName, id, jsonNode);
-                if (requestMethod.equals("DELETE")) response.handleDelete(tableName, id);
+                if (requestMethod.equals("GET")) {
+                    // DDo this when the user only routes to the table name without adding a query in the URL
+                    if (requestPath.length == 1 && requestQuery != null) {
+                        response.handleGet(tableName, condition);
+
+                    // Do when URL just route to the table without query
+                    } else if (requestPath.length == 1) {
+                        response.handleGet(tableName, null);
+                    } else if (requestPath.length == 2 && requestQuery == null) {
+                        response.handleGet(tableName, "id=" + requestPath[1]);
+//                    } else if (requestPath.length == 3) {
+//                        response.handleGet(tableName, id, tableName2);
+                    }
+                }
+
+                if (requestMethod.equals("POST")) {
+                    response.handlePost(tableName, jsonNode);
+                }
+
+                if (requestMethod.equals("PUT")) {
+                    response.handlePut(tableName, id, jsonNode);
+                }
+
+                if (requestMethod.equals("DELETE")) {
+                    response.handleDelete(tableName, id);
+                }
             } catch (Exception e) {
                 System.err.println(e.getMessage());
                 e.printStackTrace();
             }
-
-
         }
     }
 

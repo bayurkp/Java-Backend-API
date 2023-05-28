@@ -56,9 +56,6 @@ public class Response {
         fieldKeys.deleteCharAt(fieldKeys.length() - 1);
         fieldValues.deleteCharAt(fieldValues.length() - 1);
 
-        System.out.println(fieldKeys);
-        System.out.println(fieldValues);
-
         Result result = this.database.insert(tableName, fieldKeys.toString(), fieldValues.toString());
         int statusCode = result.getStatusCode();
 
@@ -68,12 +65,12 @@ public class Response {
                     "\"message\": " + result.getMessage() + "," +
                     "\"data\": " + result.getData() +
                     "}");
+        } else {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage()  +
+                    "}");
         }
-
-        this.send(statusCode, "{" +
-                "\"status\": " + statusCode + "," +
-                "\"message\": " + result.getMessage()  +
-                "}");
     }
 
 
@@ -96,9 +93,6 @@ public class Response {
         fieldKeys.deleteCharAt(fieldKeys.length() - 1);
         fieldValues.deleteCharAt(fieldValues.length() - 1);
 
-        System.out.println(fieldKeys);
-        System.out.println(fieldValues);
-
         Result result = this.database.update(tableName, id, fieldKeys.toString(), fieldValues.toString());
         int statusCode = result.getStatusCode();
 
@@ -108,12 +102,12 @@ public class Response {
                     "\"message\": " + result.getMessage() + "," +
                     "\"data\": " + result.getData() +
                     "}");
+        } else {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage()  +
+                    "}");
         }
-
-        this.send(statusCode, "{" +
-                "\"status\": " + statusCode + "," +
-                "\"message\": " + result.getMessage()  +
-                "}");
     }
 
     public void handleDelete(String tableName, int id) throws IOException {
@@ -126,12 +120,12 @@ public class Response {
                     "\"message\": " + result.getMessage() + "," +
                     "\"data\": " + result.getData() +
                     "}");
+        } else {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage()  +
+                    "}");
         }
-
-        this.send(statusCode, "{" +
-                "\"status\": " + statusCode + "," +
-                "\"message\": " + result.getMessage()  +
-                "}");
     }
 
     public void send(int statusCode, String jsonMessage) throws IOException {
