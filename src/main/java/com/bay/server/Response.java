@@ -37,7 +37,6 @@ public class Response {
         }
     }
 
-
     public void handlePost(String tableName, JsonNode jsonNode) throws IOException {
         StringBuilder fieldKeys = new StringBuilder();
         StringBuilder fieldValues = new StringBuilder();
@@ -78,13 +77,62 @@ public class Response {
     }
 
 
-//    public String handlePut() {
-//
-//    }
-//
-//    public String handleDelete() {
-//
-//    }
+    public void handlePut(String tableName, int id, JsonNode jsonNode) throws IOException {
+        StringBuilder fieldKeys = new StringBuilder();
+        StringBuilder fieldValues = new StringBuilder();
+
+        Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            fieldKeys.append(field.getKey());
+            fieldKeys.append(",");
+
+            fieldValues.append(field.getValue());
+            fieldValues.append(",");
+        }
+
+        // Remove the comma (,) character at the end of the string
+        fieldKeys.deleteCharAt(fieldKeys.length() - 1);
+        fieldValues.deleteCharAt(fieldValues.length() - 1);
+
+        System.out.println(fieldKeys);
+        System.out.println(fieldValues);
+
+        Result result = this.database.update(tableName, id, fieldKeys.toString(), fieldValues.toString());
+        int statusCode = result.getStatusCode();
+
+        if (result.isSuccess()) {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage() + "," +
+                    "\"data\": " + result.getData() +
+                    "}");
+        }
+
+        this.send(statusCode, "{" +
+                "\"status\": " + statusCode + "," +
+                "\"message\": " + result.getMessage()  +
+                "}");
+    }
+
+    public void handleDelete(String tableName, int id) throws IOException {
+        Result result = this.database.delete(tableName, id);
+        int statusCode = result.getStatusCode();
+
+        if (result.isSuccess()) {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + result.getMessage() + "," +
+                    "\"data\": " + result.getData() +
+                    "}");
+        }
+
+        this.send(statusCode, "{" +
+                "\"status\": " + statusCode + "," +
+                "\"message\": " + result.getMessage()  +
+                "}");
+    }
 
     public void send(int statusCode, String jsonMessage) throws IOException {
         OutputStream outputStream = exchange.getResponseBody();
@@ -93,5 +141,4 @@ public class Response {
         outputStream.flush();
         outputStream.close();
     }
-    
 }

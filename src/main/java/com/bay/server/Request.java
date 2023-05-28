@@ -30,12 +30,15 @@ public class Request {
                 String requestBody = Parser.parseInputStream(exchange.getRequestBody());
 
                 String tableName = null;
+                int id = 0;
+                String tableName2 = null;
                 try {
                     tableName = requestPath[0];
-                } catch (IndexOutOfBoundsException e) {
+                    if (requestPath.length == 2) id = Integer.parseInt(requestPath[1]);
+                    if (requestPath.length == 3) tableName2 = requestPath[2];
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-
 
                 if (!Validate.isRequestMethodAllowed(requestMethod)) {
                     response.send(statusCode = 405, "{" +
@@ -70,6 +73,8 @@ public class Request {
                 JsonNode jsonNode = Parser.parseJson(requestBody);
                 if (requestMethod.equals("GET")) response.handleGet(tableName, condition);
                 if (requestMethod.equals("POST")) response.handlePost(tableName, jsonNode);
+                if (requestMethod.equals("PUT")) response.handlePut(tableName, id, jsonNode);
+                if (requestMethod.equals("DELETE")) response.handleDelete(tableName, id);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
                 e.printStackTrace();

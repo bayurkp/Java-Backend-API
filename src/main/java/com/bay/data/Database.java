@@ -1,5 +1,6 @@
 package com.bay.data;
 
+import com.bay.server.Parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.*;
 import java.util.*;
@@ -58,7 +59,7 @@ public class Database {
             }
 
             if (rows.size() == 0) return new Result(null, "No matching data found, please check your request", 404, false);
-            return new Result(rows, "Success", 200, true);
+            return new Result(rows, "Select success", 200, true);
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(null, e.getMessage(), 400, false);
@@ -70,10 +71,54 @@ public class Database {
             String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
             Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            return new Result(statement.executeUpdate(query), "Success", 200,true);
+            return new Result(statement.executeUpdate(query), "Insert success", 200,true);
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(null, e.getMessage(), 404,false);
+        }
+    }
+
+    public Result update(String tableName, int id, String fieldKeys, String fieldValues) {
+        if (!this.select(tableName, "id=" + id).isSuccess()) return new Result(null, "No matching data found, please check your request", 404, false);
+
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("UPDATE ").append(tableName).append(" SET ");
+
+            String[] fieldKeysParsed = Parser.splitString(fieldKeys, ",");
+            String[] fieldValuesParsed = Parser.splitString(fieldValues, ",");
+
+            for (int i = 0; i < fieldKeysParsed.length; i++) {
+                stringBuilder.append(fieldKeysParsed[i]).append("=").append(fieldValuesParsed[i]).append(",");
+            }
+
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            stringBuilder.append(" WHERE id=").append(id);
+
+            String query = stringBuilder.toString();
+
+            Connection connection = this.connect();
+            Statement statement = connection.createStatement();
+            return new Result(statement.executeUpdate(query), "Update success", 200,true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(null, e.getMessage(), 400,false);
+
+        }
+    }
+
+    public Result delete(String tableName, int id) {
+        if (!this.select(tableName, "id=" + id).isSuccess()) return new Result(null, "No matching data found, please check your request", 404, false);
+
+        try {
+            String query = "DELETE FROM " + tableName + " WHERE id=" + id;
+            Connection connection = this.connect();
+            Statement statement = connection.createStatement();
+            return new Result(statement.executeUpdate(query), "Delete success", 200,true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(null, e.getMessage(), 400,false);
+
         }
     }
 
