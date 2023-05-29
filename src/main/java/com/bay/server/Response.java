@@ -5,7 +5,6 @@ import com.bay.data.Result;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpExchange;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -53,9 +52,9 @@ public class Response {
                 jsonResult = database.joinJson(resultParent.getData(),
                         "addresses", addresses.getData());
             } else if (tableDetail.equals("products")) {
-                Result products = database.select("addresses", "seller=" + id);
+                Result products = database.select("products", "seller=" + id);
                 jsonResult = database.joinJson(resultParent.getData(),
-                        "addresses", products.getData());
+                        "products", products.getData());
             } else if (tableDetail.equals("orders")) {
                 Result orders = database.select("orders", "buyer=" + id);
                 jsonResult = database.joinJson(resultParent.getData(),
@@ -76,15 +75,43 @@ public class Response {
                 }
             }
         } else if (tableMaster.equals("orders") && tableDetail == null) {
-            Result orderDetail = database.select("orderDetails", "`order`=" + id);
-            System.out.println(orderDetail);
+            String query = "SELECT buyer FROM orders WHERE id=" + id;
+            Connection connection = database.connect();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            int idBuyer = resultSet.getInt("buyer");
+
+            Result buyer = database.select("users", "id=" + idBuyer);
             jsonResult = database.joinJson(resultParent.getData(),
+                    "buyer", buyer.getData());
+
+            Result orderDetail = database.select("orderDetails", "`order`=" + id);
+            jsonResult = database.joinJson(jsonResult,
                     "orderDetails", orderDetail.getData());
 
-            Result orderReview = database.select("orderReviews", "`order`=" + id);
-            System.out.println(orderReview.getData());
+            Result review = database.select("reviews", "`order`=" + id);
             jsonResult = database.joinJson(jsonResult,
-                    "orderDetails", orderReview.getData());
+                    "reviews", review.getData());
+        } else if (tableMaster.equals("products") && tableDetail == null) {
+            String query = "SELECT seller FROM products WHERE id=" + id;
+            Connection connection = database.connect();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            int idSeller = resultSet.getInt("seller");
+
+            Result users = database.select("users", "`id`=" + idSeller);
+            System.out.println(users);
+            jsonResult = database.joinJson(resultParent.getData(),
+                    "users", users.getData());
+        } else {
+            this.send(resultParent.getStatusCode(), "{" +
+                    "\"status\": " + resultParent.getStatusCode() + "," +
+                    "\"message\": " + resultParent.getMessage() + "," +
+                    "\"data\": " + resultParent.getData() +
+                    "}"
+            );
         }
 
         int statusCode = resultParent.getStatusCode();

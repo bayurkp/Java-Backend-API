@@ -8,12 +8,19 @@ public class Result {
 
     public Result(Object data, String message, int statusCode, boolean isSuccess) {
         this.data = data;
-        this.message = message;
-        this.statusCode = statusCode;
-        this.isSuccess = isSuccess;
+        if (data != null) {
+            this.message = message;
+            this.statusCode = statusCode;
+            this.isSuccess = isSuccess;
+        } else {
+            this.message = message;
+            this.statusCode = 400;
+            this.isSuccess = false;
+        }
     }
 
     public String getData() {
+        if (data == null) return null;
         return data.toString();
     }
 
