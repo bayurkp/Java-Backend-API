@@ -45,19 +45,47 @@ public class Response {
 
     public void handleGet(String tableMaster, int id, String tableDetail) throws IOException, SQLException {
         Result resultParent = database.select(tableMaster, "id=" + id);
-        String jsonResult = null;
+        String jsonResult = resultParent.getData();
+
+        int statusCode = resultParent.getStatusCode();
+        boolean isSuccess = resultParent.isSuccess();
+        String message = resultParent.getMessage();
+
+        if (!isSuccess) {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + message +
+                    "}");
+            return;
+        }
+
         if (tableMaster.equals("users")) {
             if (tableDetail == null) {
                 Result addresses = database.select("addresses", "user=" + id);
-                jsonResult = database.joinJson(resultParent.getData(),
+                isSuccess = addresses.isSuccess();
+                if (!isSuccess) {
+                    statusCode = addresses.getStatusCode();
+                    message = addresses.getMessage();
+                }
+                jsonResult = database.joinJson(jsonResult,
                         "addresses", addresses.getData());
             } else if (tableDetail.equals("products")) {
                 Result products = database.select("products", "seller=" + id);
-                jsonResult = database.joinJson(resultParent.getData(),
+                isSuccess = products.isSuccess();
+                if (!isSuccess) {
+                    statusCode = products.getStatusCode();
+                    message = products.getMessage();
+                }
+                jsonResult = database.joinJson(jsonResult,
                         "products", products.getData());
             } else if (tableDetail.equals("orders")) {
                 Result orders = database.select("orders", "buyer=" + id);
-                jsonResult = database.joinJson(resultParent.getData(),
+                isSuccess = orders.isSuccess();
+                if (!isSuccess) {
+                    statusCode = orders.getStatusCode();
+                    message = orders.getMessage();
+                }
+                jsonResult = database.joinJson(jsonResult,
                         "orders", orders.getData());
             } else if (tableDetail.equals("reviews")) {
                 String query = "SELECT id FROM orders WHERE buyer=" + id;
@@ -66,15 +94,27 @@ public class Response {
                 ResultSet resultSet = statement.executeQuery(query);
 
                 ArrayList<Integer> idOrders = new ArrayList<>();
-                while (resultSet.next()) idOrders.add(resultSet.getInt("id"));
-
-                for (int idOrder : idOrders) {
-                    Result reviews = database.select("reviews", "`order`=" + idOrder);
-                    jsonResult = database.joinJson(resultParent.getData(),
-                            "reviews", reviews.getData());
+                while (resultSet.next()) {
+                    idOrders.add(resultSet.getInt("id"));
                 }
+
+                Result reviews = new Result();
+
+                if (idOrders.size() == 1) {
+                    reviews = database.select("reviews", "`order`=" + idOrders.get(0));
+                } else {
+                    ArrayList<Object> tempReviews = new ArrayList<>();
+                    for (Integer idOrder : idOrders) {
+                        tempReviews.add(database.select("reviews", "`order`=" + idOrder).getData());
+                    }
+
+                    reviews.setData(tempReviews);
+                }
+                jsonResult = database.joinJson(jsonResult,
+                        "reviews", reviews.getData());
             }
         } else if (tableMaster.equals("orders") && tableDetail == null) {
+            // Select ID Buyer
             String query = "SELECT buyer FROM orders WHERE id=" + id;
             Connection connection = database.connect();
             Statement statement = connection.createStatement();
@@ -83,10 +123,13 @@ public class Response {
             int idBuyer = resultSet.getInt("buyer");
 
             Result buyer = database.select("users", "id=" + idBuyer);
-            jsonResult = database.joinJson(resultParent.getData(),
+            jsonResult = database.joinJson(jsonResult,
                     "buyer", buyer.getData());
 
-            Result orderDetail = database.select("orderDetails", "`order`=" + id);
+            // Select ID Product
+            Result orderDetail = database.customSelect("SELECT products.title, orderDetails.* FROM orderDetails " +
+                    "JOIN products ON orderDetails.product = products.id " +
+                    "WHERE orderDetails.`order`=" + 2);
             jsonResult = database.joinJson(jsonResult,
                     "orderDetails", orderDetail.getData());
 
@@ -102,24 +145,19 @@ public class Response {
             int idSeller = resultSet.getInt("seller");
 
             Result users = database.select("users", "`id`=" + idSeller);
-            System.out.println(users);
-            jsonResult = database.joinJson(resultParent.getData(),
-                    "users", users.getData());
-        } else {
-            this.send(resultParent.getStatusCode(), "{" +
-                    "\"status\": " + resultParent.getStatusCode() + "," +
-                    "\"message\": " + resultParent.getMessage() + "," +
-                    "\"data\": " + resultParent.getData() +
-                    "}"
-            );
+            jsonResult = database.joinJson(jsonResult,
+                    "seller", users.getData());
         }
 
-        int statusCode = resultParent.getStatusCode();
-
-        if (resultParent.isSuccess()) {
+        if (!isSuccess) {
             this.send(statusCode, "{" +
                     "\"status\": " + statusCode + "," +
-                    "\"message\": " + resultParent.getMessage() + "," +
+                    "\"message\": " + message +
+                    "}");
+        } else {
+            this.send(statusCode, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + message + "," +
                     "\"data\": " + jsonResult +
                     "}"
             );

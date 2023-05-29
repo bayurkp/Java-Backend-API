@@ -14,6 +14,15 @@ public class Validate {
         return Arrays.asList(database.getTables()).contains(tableName);
     }
 
+    public static boolean isIdValid(String id) {
+        try {
+            Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
     public static boolean isRequestBodyValid(String requestBody) {
         try {
             Parser.parseJson(requestBody);

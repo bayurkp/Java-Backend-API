@@ -60,12 +60,50 @@ public class Database {
             }
 
             if (rows.size() == 0) return new Result(null, "No matching data found, please check your request", 404, false);
+            else if (rows.size() == 1) return new Result(rows.get(0), "Select success", 200, true);
             return new Result(rows, "Select success", 200, true);
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(null, e.getMessage(), 400, false);
         }
     }
+
+    public Result customSelect(String customQuery) {
+        List<String> rows = new ArrayList<>();
+        try {
+            Connection connection = this.connect();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(customQuery);
+
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
+
+            while (resultSet.next()) {
+                // Format to json
+                StringBuilder row = new StringBuilder();
+                row.append("{");
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = resultSetMetaData.getColumnName(i);
+                    Object columnValue = resultSet.getObject(i);
+                    if (columnValue instanceof Double || columnValue instanceof Integer) row.append("\"").append(columnName).append("\":").append(columnValue).append(",");
+                    else row.append("\"").append(columnName).append("\":\"").append(columnValue).append("\",");
+                }
+                row.deleteCharAt(row.length() - 1);
+                row.append("}");
+                // End of formatting
+
+                rows.add(row.toString());
+            }
+
+            if (rows.size() == 0) return new Result(null, "No matching data found, please check your request", 404, false);
+            else if (rows.size() == 1) return new Result(rows.get(0), "Select success", 200, true);
+            return new Result(rows, "Select success", 200, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(null, e.getMessage(), 400, false);
+        }
+    }
+
     public Result insert(String tableName, String fieldKeys, String fieldValues) {
         try {
             String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
@@ -144,12 +182,26 @@ public class Database {
 
     public String joinJson(String firstJson, String tableName, String secondJson) {
         StringBuilder stringBuilder = new StringBuilder(firstJson);
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.append(",");
-        stringBuilder.append("\"").append(tableName).append("\"").append(":");
-        stringBuilder.append(secondJson);
-        stringBuilder.append("}]");
+
+        // Array
+        if (stringBuilder.charAt(0) == '[' && stringBuilder.charAt(stringBuilder.length() - 1) == ']') {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1); // ]
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1); // }
+            stringBuilder.append(",");
+            stringBuilder.append("\"").append(tableName).append("\"").append(":");
+            stringBuilder.append(secondJson);
+            stringBuilder.append("}]");
+        }
+
+        // Object
+        else if (stringBuilder.charAt(0) == '{' && stringBuilder.charAt(stringBuilder.length() - 1) == '}') {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1); // }
+            stringBuilder.append(",");
+            stringBuilder.append("\"").append(tableName).append("\"").append(":");
+            stringBuilder.append(secondJson);
+            stringBuilder.append("}");
+        }
+
         return stringBuilder.toString();
     }
 

@@ -1,10 +1,8 @@
 package com.bay.server;
 
-import com.bay.data.Database;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -37,6 +35,9 @@ public class Parser {
 
     public static String parseRequestQuery(String requestQuery) {
         String[] queries = splitString(requestQuery, "&");
+        if (queries.length == 1) {
+            return requestQuery;
+        }
         String field = "";
         String condition = "";
         String value = "";
