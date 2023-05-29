@@ -105,20 +105,26 @@ public class Database {
     }
 
     public Result insert(String tableName, String fieldKeys, String fieldValues) {
+        Result result;
         try {
             String query = "INSERT INTO " + tableName + " (" + fieldKeys + ") " + "VALUES (" + fieldValues + ") ";
             Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            return new Result(statement.executeUpdate(query), "Insert success", 200,true);
+            result = new Result(statement.executeUpdate(query), "Insert success", 200,true);
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result(null, e.getMessage(), 404,false);
+            result = new Result(null, e.getMessage(), 404,false);
         }
+
+        return result;
     }
 
     public Result update(String tableName, int id, String fieldKeys, String fieldValues) {
-        if (!this.select(tableName, "id=" + id).isSuccess()) return new Result(null, "No matching data found, please check your request", 404, false);
+        if (!this.select(tableName, "id=" + id).isSuccess()) {
+            return new Result(null, "No matching data found, please check your request", 404, false);
+        }
 
+        Result result;
         try {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("UPDATE ").append(tableName).append(" SET ");
@@ -137,25 +143,29 @@ public class Database {
 
             Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            return new Result(statement.executeUpdate(query), "Update success", 200,true);
+            result = new Result(statement.executeUpdate(query), "Update success", 200,true);
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result(null, e.getMessage(), 400,false);
-
+            result = new Result(null, e.getMessage(), 400,false);
         }
+
+        return result;
     }
 
     public Result delete(String tableName, int id) {
         if (!this.select(tableName, "id=" + id).isSuccess()) return new Result(null, "No matching data found, please check your request", 404, false);
 
+        Result result;
         try {
             String query = "DELETE FROM " + tableName + " WHERE id=" + id;
             Connection connection = this.connect();
             Statement statement = connection.createStatement();
-            return new Result(statement.executeUpdate(query), "Delete success", 200,true);
+            result = new Result(statement.executeUpdate(query), "Delete success", 200,true);
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result(null, e.getMessage(), 400,false);
+            result = new Result(null, e.getMessage(), 400,false);
+            return result;
         }
     }
 

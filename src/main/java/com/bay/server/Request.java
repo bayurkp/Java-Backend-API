@@ -71,21 +71,22 @@ public class Request {
                     return;
                 }
 
-                String condition = Parser.parseRequestQuery(requestQuery);
+                String condition = null;
                 if (Validate.isRequestMethodAllowed(requestMethod) && !"POST".equals(requestMethod) && requestQuery != null) {
+                    condition = Parser.parseRequestQuery(requestQuery);
                     if (condition == null) {
                         response.send(statusCode = 400, "{" +
                                 "\"status\": " + statusCode + "," +
                                 "\"message\": \"Query " + requestQuery + " is not valid\"" +
                                 "}");
+                        return;
                     }
-                    return;
                 }
 
                 if (!Validate.isRequestBodyValid(requestBody)) {
                     response.send(statusCode = 400, "{" +
                             "\"status\": " + statusCode + "," +
-                            "\"message\": \"Please input request body as JSON for insert and update data\"" +
+                            "\"message\": \"Please input request body as JSON to inserting or updating data\"" +
                             "}");
                     return;
                 }
@@ -95,17 +96,19 @@ public class Request {
                 switch (requestMethod) {
                     case "GET":
                         // Do this when the user only routes to the table name without adding a query in the URL
-                        if (requestPath.length == 1 && requestQuery != null) {
+                        if (requestPath.length == 1) {
                             response.handleGet(tableMaster, condition);
-                        // Do when URL just route to the table without query
-                        } else if (requestPath.length == 1) {
-                            response.handleGet(tableMaster, null);
                         } else if (requestPath.length == 2 && requestQuery == null) {
                             assert id != null;
                             response.handleGet(tableMaster, Integer.parseInt(id), null);
                         } else if (requestPath.length == 3 && requestQuery == null) {
                             assert id != null;
                             response.handleGet(tableMaster, Integer.parseInt(id), tableDetail);
+                        } else {
+                            response.send(statusCode = 400, "{" +
+                                    "\"status\": " + statusCode + "," +
+                                    "\"message\": \"Please check your request\"" +
+                                    "}");
                         }
                         return;
                     case "POST":
@@ -115,18 +118,28 @@ public class Request {
                         if (requestPath.length == 2) {
                             assert id != null;
                             response.handlePut(tableMaster, Integer.parseInt(id), jsonNode);
+                        } else {
+                            response.send(statusCode = 400, "{" +
+                                    "\"status\": " + statusCode + "," +
+                                    "\"message\": \"No ID detected, please check your request\"" +
+                                    "}");
                         }
                         return;
                     case "DELETE":
                         if (requestPath.length == 2) {
                             assert id != null;
                             response.handleDelete(tableMaster, Integer.parseInt(id));
+                        } else {
+                            response.send(statusCode = 400, "{" +
+                                    "\"status\": " + statusCode + "," +
+                                    "\"message\": \"No ID detected, please check your request\"" +
+                                    "}");
                         }
                         return;
                     default:
                         response.send(statusCode = 400, "{" +
                                 "\"status\": " + statusCode + "," +
-                                "\"message\": \"Please check your way\"" +
+                                "\"message\": \"Please check your request\"" +
                                 "}");
                 }
             } catch (Exception e) {

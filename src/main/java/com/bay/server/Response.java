@@ -66,27 +66,30 @@ public class Response {
                 if (!isSuccess) {
                     statusCode = addresses.getStatusCode();
                     message = addresses.getMessage();
+                } else {
+                    jsonResult = database.joinJson(jsonResult,
+                            "addresses", addresses.getData());
                 }
-                jsonResult = database.joinJson(jsonResult,
-                        "addresses", addresses.getData());
             } else if (tableDetail.equals("products")) {
                 Result products = database.select("products", "seller=" + id);
                 isSuccess = products.isSuccess();
                 if (!isSuccess) {
                     statusCode = products.getStatusCode();
                     message = products.getMessage();
+                } else {
+                    jsonResult = database.joinJson(jsonResult,
+                            "products", products.getData());
                 }
-                jsonResult = database.joinJson(jsonResult,
-                        "products", products.getData());
             } else if (tableDetail.equals("orders")) {
                 Result orders = database.select("orders", "buyer=" + id);
                 isSuccess = orders.isSuccess();
                 if (!isSuccess) {
                     statusCode = orders.getStatusCode();
                     message = orders.getMessage();
+                } else {
+                    jsonResult = database.joinJson(jsonResult,
+                            "orders", orders.getData());
                 }
-                jsonResult = database.joinJson(jsonResult,
-                        "orders", orders.getData());
             } else if (tableDetail.equals("reviews")) {
                 String query = "SELECT id FROM orders WHERE buyer=" + id;
                 Connection connection = database.connect();
@@ -99,7 +102,6 @@ public class Response {
                 }
 
                 Result reviews = new Result();
-
                 if (idOrders.size() == 1) {
                     reviews = database.select("reviews", "`order`=" + idOrders.get(0));
                 } else {
@@ -107,11 +109,17 @@ public class Response {
                     for (Integer idOrder : idOrders) {
                         tempReviews.add(database.select("reviews", "`order`=" + idOrder).getData());
                     }
-
                     reviews.setData(tempReviews);
                 }
-                jsonResult = database.joinJson(jsonResult,
-                        "reviews", reviews.getData());
+
+                isSuccess = reviews.isSuccess();
+                if (!isSuccess) {
+                    statusCode = reviews.getStatusCode();
+                    message = reviews.getMessage();
+                } else  {
+                    jsonResult = database.joinJson(jsonResult,
+                            "reviews", reviews.getData());
+                }
             }
         } else if (tableMaster.equals("orders") && tableDetail == null) {
             // Select ID Buyer
@@ -119,23 +127,46 @@ public class Response {
             Connection connection = database.connect();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
-
             int idBuyer = resultSet.getInt("buyer");
 
+            // Select a user who has a Buyer ID above
             Result buyer = database.select("users", "id=" + idBuyer);
-            jsonResult = database.joinJson(jsonResult,
-                    "buyer", buyer.getData());
 
-            // Select ID Product
-            Result orderDetail = database.customSelect("SELECT products.title, orderDetails.* FROM orderDetails " +
+            isSuccess = buyer.isSuccess();
+            if (!isSuccess) {
+                statusCode = buyer.getStatusCode();
+                message = buyer.getMessage();
+            } else {
+                jsonResult = database.joinJson(jsonResult,
+                        "buyer", buyer.getData());
+            }
+
+            // Select all order detail columns in the orderDetails
+            // and the product title in the products when the order id matches
+            Result orderDetails = database.customSelect("SELECT products.title, orderDetails.* FROM orderDetails " +
                     "JOIN products ON orderDetails.product = products.id " +
-                    "WHERE orderDetails.`order`=" + 2);
-            jsonResult = database.joinJson(jsonResult,
-                    "orderDetails", orderDetail.getData());
+                    "WHERE orderDetails.`order`=" + id);
 
+            isSuccess = orderDetails.isSuccess();
+            if (!isSuccess) {
+                statusCode = orderDetails.getStatusCode();
+                message = orderDetails.getMessage();
+            } else {
+                jsonResult = database.joinJson(jsonResult,
+                        "orderDetails", orderDetails.getData());
+            }
+
+            // Select buyer reviews
             Result review = database.select("reviews", "`order`=" + id);
-            jsonResult = database.joinJson(jsonResult,
-                    "reviews", review.getData());
+            isSuccess = orderDetails.isSuccess();
+            if (!isSuccess) {
+                statusCode = orderDetails.getStatusCode();
+                message = orderDetails.getMessage();
+            } else {
+                jsonResult = database.joinJson(jsonResult,
+                        "reviews", review.getData());
+            }
+
         } else if (tableMaster.equals("products") && tableDetail == null) {
             String query = "SELECT seller FROM products WHERE id=" + id;
             Connection connection = database.connect();
@@ -145,8 +176,21 @@ public class Response {
             int idSeller = resultSet.getInt("seller");
 
             Result users = database.select("users", "`id`=" + idSeller);
-            jsonResult = database.joinJson(jsonResult,
-                    "seller", users.getData());
+            isSuccess = users.isSuccess();
+            if (!isSuccess) {
+                statusCode = users.getStatusCode();
+                message = users.getMessage();
+            } else {
+                jsonResult = database.joinJson(jsonResult,
+                        "reviews", users.getData());
+            }
+        } else {
+            this.send(statusCode = 400, "{" +
+                    "\"status\": " + statusCode + "," +
+                    "\"message\": " + "\"No matching data found, please check your request\"" +
+                    "}"
+            );
+            return;
         }
 
         if (!isSuccess) {
