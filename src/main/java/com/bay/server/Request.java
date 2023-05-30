@@ -30,7 +30,7 @@ public class Request {
                 int statusCode;
 
                 try {
-                    reqApiKey = exchange.getRequestHeaders().get("x-api-key").get(0);
+                    reqApiKey = exchange.getRequestHeaders().get("api-key").get(0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

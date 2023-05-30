@@ -69,9 +69,8 @@ public class Parser {
                                 case "notEqual":
                                     condition = "<>";
                                     break;
-                                case "like":
-                                    condition = "LIKE";
-                                    break;
+                                default:
+                                    return null;
                             }
                             break;
                         case "v":
@@ -86,33 +85,10 @@ public class Parser {
                 e.printStackTrace();
             }
         } else if (queries.length == 1) {
-            String typeKey = "";
-            String typeValue = "";
             try {
-                    String queryKey = splitString(requestQuery, "=")[0];
-                    String queryValue = splitString(requestQuery, "=")[1];
-
-                    if (queryKey.equals("type")) {
-                        typeKey = "type";
-                        switch (queryValue) {
-                            case "house":
-                                typeValue = "\"House\"";
-                                break;
-                            case "office":
-                                typeValue = "\"Office\"";
-                                break;
-                            case "buyer":
-                                typeValue = "\"Buyer\"";
-                                break;
-                            case "seller":
-                                typeValue = "\"Seller\"";
-                                break;
-                            default:
-                                return null;
-                        }
-                    }
-
-                return typeKey + "=" + typeValue;
+                String key = splitString(requestQuery, "=")[0];
+                String value = splitString(requestQuery, "=")[1];
+                return key + "=" + "\"" + value + "\"";
             } catch (Exception e) {
                 e.printStackTrace();
             }
