@@ -3,6 +3,9 @@ package com.bay.server;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.github.cdimascio.dotenv.Dotenv;
+
+
 import java.util.*;
 
 public class Request {
@@ -17,10 +20,21 @@ public class Request {
         @Override
         public void handle(HttpExchange exchange) {
             try {
+                Dotenv dotenv = Dotenv.configure().directory(Main.getRootPath()).filename(".env").load();
+                String envApiKey = dotenv.get("API_KEY");
+                String reqApiKey = exchange.getRequestHeaders().get("x-api-key").get(0);
                 Response response = new Response(exchange);
 
                 exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/json"));
                 int statusCode;
+
+                if (!envApiKey.equals(reqApiKey)) {
+                    response.send(statusCode = 401, "{" +
+                            "\"status\": " + statusCode + "," +
+                            "\"message\": \"API key not authorized\"" +
+                            "}");
+                    return;
+                }
 
                 String requestMethod = exchange.getRequestMethod();
                 String requestQuery = exchange.getRequestURI().getQuery();

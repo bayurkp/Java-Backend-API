@@ -1,5 +1,6 @@
 package com.bay.data;
 
+import com.bay.server.Main;
 import com.bay.server.Parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -7,7 +8,6 @@ import java.sql.*;
 import java.util.*;
 
 public class Database {
-    private final String rootPath = System.getProperty("user.dir");
     private final String[] tables = {
             "addresses",
             "orderDetails",
@@ -19,7 +19,7 @@ public class Database {
     public Connection connect() {
         Connection connection = null;
         try {
-            String path = "jdbc:sqlite:" + rootPath + "/ecommerce.db";
+            String path = "jdbc:sqlite:" + Main.getRootPath() + "/ecommerce.db";
             connection = DriverManager.getConnection(path);
         } catch (SQLException e) {
 
