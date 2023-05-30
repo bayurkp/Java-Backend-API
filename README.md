@@ -32,6 +32,12 @@ IntelliJ IDEA adalah sebuah lingkungan pengembangan terintegrasi (IDE) yang digu
 
 [Download IntelliJ IDEA](http://code.visualstudio.com/download)
 
+-   DB Browser for SQLite
+
+DB Browser for SQLite adalah perangkat lunak yang digunakan untuk mengelola dan mengakses basis data SQLite. SQLite merupakan sistem manajemen basis data yang ringan. Dengan menggunakan DB Browser for SQLite, pengguna dapat dengan mudah memanipulasi data pada basis data SQLite. Alat ini berguna bagi pengembang perangkat lunak, analis data, atau siapa pun yang perlu berinteraksi dengan database SQLite melalui GUI.
+
+[Download DB Browser for SQLite](https://sqlitebrowser.org/dl/)
+
 ## Prasyarat
 
 Adapun prasyarat untuk menjalankan program ini adalah sebagai berikut:
