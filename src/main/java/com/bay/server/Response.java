@@ -107,11 +107,27 @@ public class Response {
                 } else {
                     ArrayList<Object> tempReviews = new ArrayList<>();
                     for (Integer idOrder : idOrders) {
-                        tempReviews.add(database.select("reviews", "`order`=" + idOrder).getData());
+                        Result review = database.select("reviews", "`order`=" + idOrder);
+                        if (review.getData() != null) {
+                            tempReviews.add(review.getData());
+                        }
                     }
-                    reviews.setData(tempReviews);
+
+                    if (tempReviews.contains(null)) {
+                        System.out.println("seriosuly");
+                        reviews.setData(null);
+                        reviews.setStatusCode(400);
+                        reviews.setMessage("No matching data found");
+                        reviews.setSuccess(false);
+                    } else {
+                        reviews.setData(tempReviews);
+                        reviews.setStatusCode(200);
+                        reviews.setMessage("Select success");
+                        reviews.setSuccess(true);
+                    }
                 }
 
+                System.out.println(reviews.isSuccess());
                 isSuccess = reviews.isSuccess();
                 if (!isSuccess) {
                     statusCode = reviews.getStatusCode();
@@ -138,7 +154,7 @@ public class Response {
                 message = buyer.getMessage();
             } else {
                 jsonResult = database.joinJson(jsonResult,
-                        "buyer", buyer.getData());
+                        "buyerDetail", buyer.getData());
             }
 
             // Select all order detail columns in the orderDetails
@@ -164,7 +180,7 @@ public class Response {
                 message = orderDetails.getMessage();
             } else {
                 jsonResult = database.joinJson(jsonResult,
-                        "reviews", review.getData());
+                        "review", review.getData());
             }
 
         } else if (tableMaster.equals("products") && tableDetail == null) {
@@ -182,7 +198,7 @@ public class Response {
                 message = users.getMessage();
             } else {
                 jsonResult = database.joinJson(jsonResult,
-                        "reviews", users.getData());
+                        "sellerDetail", users.getData());
             }
         } else {
             this.send(statusCode = 400, "{" +
