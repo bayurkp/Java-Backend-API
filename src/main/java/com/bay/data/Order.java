@@ -8,15 +8,6 @@ public class Order {
     private int discount;
     private int isPaid;
 
-    public Order(int id, int buyer, String note, double total, int discount, int isPaid) {
-        this.id = id;
-        this.buyer = buyer;
-        this.note = note;
-        this.total = total;
-        this.discount = discount;
-        this.isPaid = isPaid;
-    }
-
     public Order() {
         super();
     }

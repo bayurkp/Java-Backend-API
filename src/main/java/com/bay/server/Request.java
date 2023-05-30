@@ -22,11 +22,19 @@ public class Request {
             try {
                 Dotenv dotenv = Dotenv.configure().directory(Main.getRootPath()).filename(".env").load();
                 String envApiKey = dotenv.get("API_KEY");
-                String reqApiKey = exchange.getRequestHeaders().get("x-api-key").get(0);
+                String reqApiKey = null;
+
                 Response response = new Response(exchange);
 
                 exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/json"));
                 int statusCode;
+
+                try {
+                    reqApiKey = exchange.getRequestHeaders().get("x-api-key").get(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
 
                 if (!envApiKey.equals(reqApiKey)) {
                     response.send(statusCode = 401, "{" +

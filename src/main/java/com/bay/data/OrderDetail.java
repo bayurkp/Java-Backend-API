@@ -1,6 +1,7 @@
 package com.bay.data;
 
 public class OrderDetail {
+    private int id;
     private int order;
     private int product;
     private int quantity;
@@ -10,11 +11,12 @@ public class OrderDetail {
         super();
     }
 
-    public OrderDetail(int order, int product, int quantity, double price) {
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-        this.price = price;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getOrder() {

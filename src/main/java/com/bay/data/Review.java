@@ -1,18 +1,21 @@
 package com.bay.data;
 
 public class Review {
+    private int id;
     private int order;
     private int star;
     private String description;
 
-    public Review(int order, int star, String description) {
-        this.order = order;
-        this.star = star;
-        this.description = description;
-    }
-
     public Review() {
         super();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getOrder() {

@@ -8,15 +8,6 @@ public class Product {
     private double price;
     private int stock;
 
-    public Product(int id, int seller, String title, String description, double price, int stock) {
-        this.id = id;
-        this.seller = seller;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.stock = stock;
-    }
-
     public Product() {
         super();
     }

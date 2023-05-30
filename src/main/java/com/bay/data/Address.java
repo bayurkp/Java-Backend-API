@@ -1,6 +1,7 @@
 package com.bay.data;
 
 public class Address {
+    private int id;
     private int user;
     private AddressType type;
     private String line1;
@@ -13,14 +14,12 @@ public class Address {
         super();
     }
 
-    public Address(int user, AddressType type, String line1, String line2, String city, String province, String postcode) {
-        this.user = user;
-        this.type = type;
-        this.line1 = line1;
-        this.line2 = line2;
-        this.city = city;
-        this.province = province;
-        this.postcode = postcode;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getUser() {
