@@ -35,58 +35,87 @@ public class Parser {
 
     public static String parseRequestQuery(String requestQuery) {
         String[] queries = splitString(requestQuery, "&");
-        if (queries.length == 1) {
-            return requestQuery;
-        }
-        String field = "";
-        String condition = "";
-        String value = "";
-        try {
-            for (String query : queries) {
-                String queryKey = splitString(query, "=")[0];
-                String queryValue = splitString(query, "=")[1];
 
-                switch (queryKey) {
-                    case "f":
-                        field = queryValue;
-                        break;
-                    case "c":
+        if (queries.length == 3) {
+            String field = "";
+            String condition = "";
+            String value = "";
+            try {
+                for (String query : queries) {
+                    String queryKey = splitString(query, "=")[0];
+                    String queryValue = splitString(query, "=")[1];
+
+                    switch (queryKey) {
+                        case "f":
+                            field = queryValue;
+                            break;
+                        case "c":
+                            switch (queryValue) {
+                                case "greaterEqual":
+                                    condition = ">=";
+                                    break;
+                                case "greater":
+                                    condition = ">";
+                                    break;
+                                case "lessEqual":
+                                    condition = "<=";
+                                    break;
+                                case "less":
+                                    condition = "<";
+                                    break;
+                                case "equal":
+                                    condition = "=";
+                                    break;
+                                case "notEqual":
+                                    condition = "<>";
+                                    break;
+                                case "like":
+                                    condition = "LIKE";
+                                    break;
+                            }
+                            break;
+                        case "v":
+                            value = queryValue;
+                            break;
+                        default:
+                            return null;
+                    }
+                }
+                return field + " " + condition + " " + value;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (queries.length == 1) {
+            String typeKey = "";
+            String typeValue = "";
+            try {
+                    String queryKey = splitString(requestQuery, "=")[0];
+                    String queryValue = splitString(requestQuery, "=")[1];
+
+                    if (queryKey.equals("type")) {
+                        typeKey = "type";
                         switch (queryValue) {
-                            case "greaterEqual":
-                                condition = ">=";
+                            case "house":
+                                typeValue = "\"House\"";
                                 break;
-                            case "greater":
-                                condition = ">";
+                            case "office":
+                                typeValue = "\"Office\"";
                                 break;
-                            case "lessEqual":
-                                condition = "<=";
+                            case "buyer":
+                                typeValue = "\"Buyer\"";
                                 break;
-                            case "less":
-                                condition = "<";
-                                break;
-                            case "equal":
-                                condition = "=";
-                                break;
-                            case "notEqual":
-                                condition = "<>";
-                                break;
-                            case "like":
-                                condition = "LIKE";
+                            case "seller":
+                                typeValue = "\"Seller\"";
                                 break;
                             default:
                                 return null;
                         }
-                        break;
-                    case "v":
-                        value = queryValue;
-                        break;
-                    default:
-                        return null;
-                }
+                    }
+
+                return typeKey + "=" + typeValue;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            return field + " " + condition + " " + value;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return null;

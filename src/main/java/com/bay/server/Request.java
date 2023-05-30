@@ -119,6 +119,7 @@ public class Request {
                     case "GET":
                         // Do this when the user only routes to the table name without adding a query in the URL
                         if (requestPath.length == 1) {
+                            System.out.println(condition);
                             response.handleGet(tableMaster, condition);
                         } else if (requestPath.length == 2 && requestQuery == null) {
                             assert id != null;
