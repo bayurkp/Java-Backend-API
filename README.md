@@ -9,6 +9,7 @@ Oleh Bayu Rizky Kurnia Pratama - 2205551070
     -   [Pengenalan](#pengenalan)
     -   [Alat](#alat)
     -   [Prasyarat](#prasyarat)
+    -   [Batasan Program](#batasan-program)
     -   [Penggunaan](#penggunaan)
         -   [Persiapan](#persiapan)
         -   [Otorisasi](#otorisasi)
@@ -57,6 +58,37 @@ Adapun prasyarat untuk menjalankan program ini adalah sebagai berikut:
 -   Dotenv Java 3.0.0
 
 [Download Dotenv Java](https://github.com/cdimascio/dotenv-java)
+
+## Batasan Program
+
+-   Hanya _request method_ GET, POST, PUT, dan DELETE yang dizinkan.
+
+![Request method not allowed](img/Validate-1.png "Request method not allowed")
+
+-   Tidak diperkenankan kesalahan dalam penulisan nama tabel, berikut daftar tabel dengan penulisan yang tepat:
+
+```
+users
+products
+orders
+orderDetails
+addresses
+reviews
+```
+
+![Table name not found](img/Validate-2.png "Table name not found")
+
+-   ID merupakan bilangan bulat dari 1 sampai batas kolom pada tabel tertentu.
+
+![Wrong ID format](img/Validate-3.png "Wrong ID format")
+
+-   Parameter pada URL harus sesuai dengan ketentuan, untuk lebih detailnya pada [GET](#get) bagian **`localhost:8070/{table}?{params}`**
+
+![Wrong ID format](img/Validate-4.png "Wrong ID format")
+
+-   Format _request body_ yang diterima pada _request method_ POST dan PUT hanyalah JSON atau _JavaScript Object Notation_
+
+![Wrong request body format](img/Validate-5.png "Wrong request body format")
 
 ## Penggunaan
 
