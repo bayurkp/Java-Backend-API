@@ -105,7 +105,7 @@ public class Request {
                     }
                 }
 
-                if (!Validate.isRequestBodyValid(requestBody)) {
+                if (!Validate.isRequestBodyValid(requestBody) && (requestMethod.equals("POST") || requestMethod.equals("PUT"))) {
                     response.send(statusCode = 400, "{" +
                             "\"status\": " + statusCode + "," +
                             "\"message\": \"Please input request body as JSON to inserting or updating data\"" +
@@ -113,7 +113,10 @@ public class Request {
                     return;
                 }
 
-                JsonNode jsonNode = Parser.parseJson(requestBody);
+                JsonNode jsonNode = null;
+
+                if (requestMethod.equals("POST") || requestMethod.equals("PUT")) 
+                    jsonNode = Parser.parseJson(requestBody);
 
                 switch (requestMethod) {
                     case "GET":
